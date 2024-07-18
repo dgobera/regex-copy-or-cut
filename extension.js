@@ -9,23 +9,23 @@ const utils = require('./utils');
 function activate(context) {
     // Command to delete lines
     let deleteLinesCommand = vscode.commands.registerTextEditorCommand('extension.deleteLines', function () {
-        utils.commandsImplementation('deleted', false)
+        utils.commandsImplementation('deleted', "Delete Lines Matching Regex Pattern", false)
     });
 
     let cutLinesCommand = vscode.commands.registerTextEditorCommand('extension.cutLines', function () {
-        utils.commandsImplementation('cut', false)
+        utils.commandsImplementation('cut', "Cut Lines Matching Regex Pattern", false)
     });
 
     let copyLinesCommand = vscode.commands.registerTextEditorCommand('extension.copyLines', function () {
-        utils.commandsImplementation('copied', false);
+        utils.commandsImplementation('copied', "Copy Lines Matching Regex Pattern", false);
     });
 
     let cutToNewDocCommand = vscode.commands.registerTextEditorCommand('extension.cutToNewDocCommand', function () {
-        utils.commandsImplementation('cut', true);
+        utils.commandsImplementation('cut', "Cut Lines Matching Regex Pattern and Paste Into New Document", true);
     });
 
     let copyToNewDocCommand = vscode.commands.registerTextEditorCommand('extension.copyToNewDocCommand', function () {
-        utils.commandsImplementation('copied', true);
+        utils.commandsImplementation('copied', "Copy Lines Matching Regex Pattern and Paste Into New Document", true);
     });
 
     context.subscriptions.push(deleteLinesCommand);

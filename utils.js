@@ -4,11 +4,43 @@ const vscode = require('vscode');
  * Show input box, return result
  * @param {vscode.window} window
  */
-async function showInputBox(window) {
-    var result = await window.showInputBox({
-        placeHolder: 'Search term (regular expression)'
+async function showInputRegexBox(window, title) {
+    let caseSensitive = false;
+
+    const inputBox = vscode.window.createInputBox();
+    inputBox.placeholder = 'Search term (regular expression)';
+    inputBox.title = title;
+    let updatePrompt = () => {
+        inputBox.prompt = caseSensitive ? "Match case" : "Ignore case";
+    }
+
+    inputBox.buttons = [
+        {
+            iconPath: new vscode.ThemeIcon('case-sensitive'),
+            tooltip: 'Toggle Case Sensitivity'
+        }
+    ];
+
+    inputBox.onDidTriggerButton(() => {
+        caseSensitive = !caseSensitive;
+        updatePrompt();
     });
-    return result;
+
+    updatePrompt();
+
+    return new Promise((resolve) => {
+        inputBox.onDidAccept(() => {
+            resolve({ searchTerm: inputBox.value, caseSensitive });
+            inputBox.dispose();
+        });
+
+        inputBox.onDidHide(() => {
+            resolve(null);
+            inputBox.dispose();
+        });
+
+        inputBox.show();
+    });   
 }
 
 /**
@@ -63,9 +95,9 @@ function getMatchingLines(editor, searchTerm) {
  * @param {String} mode The mode to work in - copy, cut or delete
  * @param {boolean} shouldOpenNewTab Whether we should open a new tab and paste the text into it
  */
-function commandsImplementation(mode, shouldOpenNewTab) {
+function commandsImplementation(mode, title, shouldOpenNewTab) {
     const window = vscode.window;
-    var result = showInputBox(window)
+    var result = showInputRegexBox(window, title);
     var editor = vscode.window.activeTextEditor;
 
     // Action to be taken when box is submitted
