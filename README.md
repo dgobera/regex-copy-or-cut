@@ -16,13 +16,13 @@ VScode extension that allows copying, cutting or even deleting all lines matchin
 ## Release Notes
 
 ### 1.3.0
-Added an option to ignore case when matching regex.
+Added an option to ignore case when matching regex, sticky.
 
 ### 1.2.0
-Refactor code, fix bugs, improve error handling
+Refactor code, fix bugs, improve error handling.
 
 ### 1.1.0
-Added paste into new document functionality
+Added paste into new document functionality.
 
 ### 1.0.0
 Initial version. Basic function, regex only matching.
