@@ -9,23 +9,23 @@ const utils = require('./utils');
 function activate(context) {
     // Command to delete lines
     let deleteLinesCommand = vscode.commands.registerTextEditorCommand('extension.deleteLines', function () {
-        utils.commandsImplementation('deleted', "Delete Lines Matching Regex Pattern", false)
+        utils.commandsImplementation(context, 'deleted', "Delete Lines Matching Regex Pattern", false)
     });
 
     let cutLinesCommand = vscode.commands.registerTextEditorCommand('extension.cutLines', function () {
-        utils.commandsImplementation('cut', "Cut Lines Matching Regex Pattern", false)
+        utils.commandsImplementation(context, 'cut', "Cut Lines Matching Regex Pattern", false)
     });
 
     let copyLinesCommand = vscode.commands.registerTextEditorCommand('extension.copyLines', function () {
-        utils.commandsImplementation('copied', "Copy Lines Matching Regex Pattern", false);
+        utils.commandsImplementation(context, 'copied', "Copy Lines Matching Regex Pattern", false);
     });
 
     let cutToNewDocCommand = vscode.commands.registerTextEditorCommand('extension.cutToNewDocCommand', function () {
-        utils.commandsImplementation('cut', "Cut Lines Matching Regex Pattern and Paste Into New Document", true);
+        utils.commandsImplementation(context, 'cut', "Cut Lines Matching Regex Pattern and Paste Into New Document", true);
     });
 
     let copyToNewDocCommand = vscode.commands.registerTextEditorCommand('extension.copyToNewDocCommand', function () {
-        utils.commandsImplementation('copied', "Copy Lines Matching Regex Pattern and Paste Into New Document", true);
+        utils.commandsImplementation(context, 'copied', "Copy Lines Matching Regex Pattern and Paste Into New Document", true);
     });
 
     context.subscriptions.push(deleteLinesCommand);

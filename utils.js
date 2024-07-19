@@ -1,11 +1,12 @@
 const vscode = require('vscode');
 
+const CASE_SENSITIVE_KEY = 'regexFiltering.caseSensitive';
+
 /**
  * Show input box, return result
- * @param {vscode.window} window
  */
-async function showInputRegexBox(window, title) {
-    let caseSensitive = false;
+async function showInputRegexBox(context, title) {
+    let caseSensitive = context.globalState.get(CASE_SENSITIVE_KEY, false);
 
     const inputBox = vscode.window.createInputBox();
     inputBox.placeholder = 'Search term (regular expression)';
@@ -24,6 +25,9 @@ async function showInputRegexBox(window, title) {
     inputBox.onDidTriggerButton(() => {
         caseSensitive = !caseSensitive;
         updatePrompt();
+        
+        // save the setting so it's sticky
+        context.globalState.update(CASE_SENSITIVE_KEY, caseSensitive);
     });
 
     updatePrompt();
@@ -97,19 +101,19 @@ function getMatchingLines(editor, searchTerm, caseSensitive) {
  * @param {String} mode The mode to work in - copy, cut or delete
  * @param {boolean} shouldOpenNewTab Whether we should open a new tab and paste the text into it
  */
-function commandsImplementation(mode, title, shouldOpenNewTab) {
-    const window = vscode.window;
+function commandsImplementation(context, mode, title, shouldOpenNewTab) {
     
     // Action to be taken when box is submitted
-    showInputRegexBox(window, title).then(result => {
+    showInputRegexBox(context, title).then(result => {
         
         if (!result) {
             // if null, the user cancelled
             return;
         }
-
+        
         try {
-            const editor = vscode.window.activeTextEditor;
+            const window = vscode.window;
+            const editor = window.activeTextEditor;
             const { searchTerm, caseSensitive } = result;
 
             // Ensuring search term is not invalid
