@@ -7,14 +7,31 @@ const CASE_SENSITIVE_KEY = 'regexFiltering.caseSensitive';
  */
 async function showInputRegexBox(context, title) {
     let caseSensitive = context.globalState.get(CASE_SENSITIVE_KEY, false);
+    let hasSubmittedTerms = false;
 
     const inputBox = vscode.window.createInputBox();
     inputBox.placeholder = 'Search term (regular expression)';
     inputBox.title = title;
+
     let updatePrompt = () => {
         inputBox.prompt = caseSensitive ? "Match case" : "Ignore case";
     }
 
+    let validateInput = (value) => {
+        try {
+            // check if it's a valid regex
+            new RegExp(inputBox.value);
+            inputBox.validationMessage = null;
+            return true;
+        } catch (e) {
+            inputBox.validationMessage = e.message;
+            return false;
+        }
+    }
+
+    updatePrompt();
+
+    // show buttons to toggle settings. they show up in the title bar and looks like there's no way to customize that yet
     inputBox.buttons = [
         {
             iconPath: new vscode.ThemeIcon('case-sensitive'),
@@ -22,6 +39,7 @@ async function showInputRegexBox(context, title) {
         }
     ];
 
+    // handle button clicks
     inputBox.onDidTriggerButton(() => {
         caseSensitive = !caseSensitive;
         updatePrompt();
@@ -30,12 +48,21 @@ async function showInputRegexBox(context, title) {
         context.globalState.update(CASE_SENSITIVE_KEY, caseSensitive);
     });
 
-    updatePrompt();
+    // validate input while typing, but only after it's been submitted once
+    inputBox.onDidChangeValue((value) => {
+        if (hasSubmittedTerms) {
+            validateInput(value);
+        }
+    });
 
     return new Promise((resolve) => {
         inputBox.onDidAccept(() => {
-            resolve({ searchTerm: inputBox.value, caseSensitive });
-            inputBox.dispose();
+            hasSubmittedTerms = true;
+
+            if (validateInput(inputBox.value)) {
+                resolve({ searchTerm: inputBox.value, caseSensitive });
+                inputBox.dispose();
+            }
         });
 
         inputBox.onDidHide(() => {
@@ -62,11 +89,12 @@ function getMatchingLines(editor, searchTerm, caseSensitive) {
     var lineContent;
     var listOfRanges = [];
     var text = '';
-    const searchRegex = new RegExp(searchTerm, caseSensitive ? '' : 'i');
-
+    
     // The end of line most commonly used in the document
     const endOfLine = editor.document.eol;
     try {
+        const searchRegex = new RegExp(searchTerm, caseSensitive ? '' : 'i');
+
         // iterate though the lines in the document
         for (let index = 0; index < editor.document.lineCount; index++) {
             // Get the current line
