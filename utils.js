@@ -53,11 +53,13 @@ async function showInputRegexBox(window, title) {
  *   Array containing a list of ranges of the matching lines (item 0) and the text of them (item 1)
  * @todo Optionally offer plain string matching
  */
-function getMatchingLines(editor, searchTerm) {
+function getMatchingLines(editor, searchTerm, caseSensitive) {
     var currentLine;
     var lineContent;
     var listOfRanges = [];
     var text = '';
+    const searchRegex = new RegExp(searchTerm, caseSensitive ? '' : 'i');
+
     // The end of line most commonly used in the document
     const endOfLine = editor.document.eol;
     try {
@@ -69,7 +71,7 @@ function getMatchingLines(editor, searchTerm) {
             lineContent = currentLine.text
     
             // If the regex provided in searchTerm matches part of the line
-            if (lineContent.search(searchTerm) != -1) {
+            if (searchRegex.test(lineContent)) {
     
                 // Append correct end of line char to the line and append to the text string
                 if (endOfLine === vscode.EndOfLine.CRLF) {
@@ -97,16 +99,23 @@ function getMatchingLines(editor, searchTerm) {
  */
 function commandsImplementation(mode, title, shouldOpenNewTab) {
     const window = vscode.window;
-    var result = showInputRegexBox(window, title);
-    var editor = vscode.window.activeTextEditor;
-
+    
     // Action to be taken when box is submitted
-    result.then(searchTerm => {
+    showInputRegexBox(window, title).then(result => {
+        
+        if (!result) {
+            // if null, the user cancelled
+            return;
+        }
+
         try {
+            const editor = vscode.window.activeTextEditor;
+            const { searchTerm, caseSensitive } = result;
+
             // Ensuring search term is not invalid
             if (searchTerm != '' && searchTerm != undefined) {
                 // Get matching lines
-                var lines = getMatchingLines(editor, searchTerm)
+                var lines = getMatchingLines(editor, searchTerm, caseSensitive)
                 // If there are matching lines
                 if (lines[0] != '') {
                     if (mode == "cut" || mode == "copied") {
